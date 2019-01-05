@@ -1,0 +1,15 @@
+<idea-plugin>
+    <id>com.jetbrains.TimeTracker</id>
+    <name>Time Tracker</name>
+    <vendor email="avramenkoyana@yandex.com" url="http://www.avramenko.com">Yana</vendor>
+
+    <extensions defaultExtensionNs="com.intellij">
+    </extensions>
+
+    <actions>
+        <group id="TimeTracker.SampleMenu" text="Time Tracker" description="Start tracking session">
+            <add-to-group group-id="MainMenu" anchor="last"/>
+            <action id="TimeTracker.Textboxes" class="timetracker.ActionSettings" text="Start session" description="Enter the session duration in minutes"/>
+        </group>
+    </actions>
+</idea-plugin>
