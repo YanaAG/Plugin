@@ -4,6 +4,7 @@
     <vendor email="avramenkoyana@yandex.com" url="http://www.avramenko.com">Yana</vendor>
 
     <extensions defaultExtensionNs="com.intellij">
+        <projectService serviceImplementation="timetracker.actions.TimerConfig"/>
     </extensions>
 
     <actions>
@@ -12,4 +13,11 @@
             <action id="TimeTracker.Textboxes" class="timetracker.ActionSettings" text="Start session" description="Enter the session duration in minutes"/>
         </group>
     </actions>
+
+    <project-components>
+        <component>
+            <implementation-class>timetracker.TimerStatusBar</implementation-class>
+        </component>
+    </project-components>
+
 </idea-plugin>

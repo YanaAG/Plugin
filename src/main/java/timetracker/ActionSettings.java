@@ -2,8 +2,10 @@ package timetracker;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import timetracker.actions.TimerConfig;
 
 public class ActionSettings extends AnAction {
     @Override
@@ -20,6 +22,10 @@ public class ActionSettings extends AnAction {
                     int lenInt = Integer.parseInt(lenStr);
                     if (lenInt <= 0) throw new NumberFormatException();
                     enterTime = false;
+                    TimerConfig timerConfig = ServiceManager.getService(project, TimerConfig.class);
+                    TimerConfig.State newState = timerConfig.getState();
+                    newState.sessionLength = lenInt;
+                    timerConfig.loadState(newState);
                 }
             } catch (NumberFormatException exc){
                 lenStr = Messages.showInputDialog(project, "Time entered incorrectly, please try again", "Input error", Messages.getErrorIcon());
