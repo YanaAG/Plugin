@@ -37,6 +37,7 @@ public class TimeWork implements StatusBarWidget.TextPresentation, ActionListene
     private int secondsLeft;
     private int currentSessinsMins;
     private TimerConfig timerConfig;
+    private TrackerCommitToGit trackerCommitToGit;
 
     private Consumer<MouseEvent> mouseEventConsumer = new Consumer<MouseEvent>() {
         @Override
@@ -47,6 +48,8 @@ public class TimeWork implements StatusBarWidget.TextPresentation, ActionListene
                 phaseState = TimerPhaseState.MAIN;
             } else {
                 if (playState == TimerPlayState.DONE){
+                    //set commits before session
+                    trackerCommitToGit.setBeforeSession();
                     currentSessinsMins = timerConfig.getState().sessionLength;
                     secondsLeft = currentSessinsMins * 60;
                     playState = TimerPlayState.RUNNING;
@@ -67,6 +70,7 @@ public class TimeWork implements StatusBarWidget.TextPresentation, ActionListene
         phaseState = TimerPhaseState.MAIN;
         playState = TimerPlayState.DONE;
         timerConfig = ServiceManager.getService(project, TimerConfig.class);
+        trackerCommitToGit = new TrackerCommitToGit(project.getBasePath() + "/.git");
     }
 
     @Override
@@ -77,6 +81,8 @@ public class TimeWork implements StatusBarWidget.TextPresentation, ActionListene
                 if (phaseState == TimerPhaseState.MAIN){
                     phaseState = TimerPhaseState.BREAK;
                     secondsLeft = BREAK_MINS * 60;
+                    //count commits after session
+                    trackerCommitToGit.countAfterSession();
                     popupAlert ("Session completed (" + currentSessinsMins + " mins)");
                 } else {
                     phaseState = TimerPhaseState.MAIN;

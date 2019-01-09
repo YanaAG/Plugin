@@ -13,40 +13,56 @@ import java.io.IOException;
 
 public class TrackerCommitToGit {
     private String wayToProject;
+    private int beforeSession;
     private FileWriter writer;
+    private FileRepositoryBuilder fileRepositoryBuilder = new FileRepositoryBuilder();
+    private Repository repository;
+    private Git git;
 
     public TrackerCommitToGit(String way){
         wayToProject = way;
+        fileRepositoryBuilder.setMustExist(true);
+        fileRepositoryBuilder.setGitDir(new File(wayToProject));
+        try {
+            repository = fileRepositoryBuilder.build();
+            git = new Git(repository);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public int countCommitToGit(){
+        int count = 0;
+        try {
+            Iterable<RevCommit> log = git.log().call();
+            for (RevCommit commit : log){
+                count++;
+            }
+        } catch (GitAPIException e) {
+            e.printStackTrace();
+        }
+        git.close();
+        return (count);
+    }
+
+    public void setBeforeSession(){
+        beforeSession = countCommitToGit();
         try {
             writer = new FileWriter("D:/way.txt", true);
-            writer.write(wayToProject + "\r\n");
+            writer.write("Before session " + beforeSession + "\r\n");
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void countCommitToGit(){
-        FileRepositoryBuilder fileRepositoryBuilder = new FileRepositoryBuilder();
-        try{
+    public void countAfterSession(){
+        int afterSession = countCommitToGit();
+        try {
             writer = new FileWriter("D:/way.txt", true);
-            fileRepositoryBuilder.setMustExist(true);
-            fileRepositoryBuilder.setGitDir(new File(wayToProject));
-            Repository repository = fileRepositoryBuilder.build();
-            Git git = new Git(repository);
-            Iterable<RevCommit> log = git.log().call();
-            for (RevCommit commit : log){
-                writer.write("Commit: " + commit.getName() + "\r\n");
-                String logMessage = commit.getFullMessage();
-                writer.write("Message commit: " + logMessage + "\r\n" + "\r\n");
-            }
-            git.close();
+            writer.write("After session " + afterSession + "\r\n");
             writer.close();
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (NoHeadException e) {
-            e.printStackTrace();
-        } catch (GitAPIException e) {
             e.printStackTrace();
         }
     }
