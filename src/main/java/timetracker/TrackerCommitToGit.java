@@ -8,6 +8,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -22,6 +23,11 @@ public class TrackerCommitToGit {
     private Repository repository;
     private Git git;
     private Vector<Triple<String, String, String>> allCommits = new Vector<>();
+    private JFrame frame;
+    private JEditorPane textArea;
+    JScrollPane scrollPane;
+
+
 
     public TrackerCommitToGit(String way){
         wayToProject = way;
@@ -33,6 +39,13 @@ public class TrackerCommitToGit {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        frame = new JFrame("Issues");
+        frame.setBounds(100, 100, 765, 400);
+        textArea = new JEditorPane("text/html", "");
+        scrollPane = new JScrollPane();
+        scrollPane.setBounds(100, 100, 400, 400);
+        frame.getContentPane().add(scrollPane);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
     }
 
     public int countCommitToGit(){
@@ -57,6 +70,7 @@ public class TrackerCommitToGit {
 
     public void countAfterSession(){
         int afterSession = countCommitToGit(), diff;
+        String str = "";
         if (afterSession != beforeSession) {
             diff = afterSession - beforeSession;
             try {
@@ -65,13 +79,18 @@ public class TrackerCommitToGit {
                 Iterable<RevCommit> log = git.log().call();
                 for (RevCommit commit : log){
                     if (diff != 0){
+                        str += "<i> Commit: </i>" + "<b>" + commit.getName() + "</b>" + "<br>" + "<i> Commit message: </i>" + commit.getFullMessage() + "<br>"
+                                + "<i> Commit time: </i>" + new Date(commit.getCommitTime() * 1000L) + "<br><br>";
                         writer.write("Commit: " + commit.getName() + "\r\n");
                         writer.write("Commit message: " + commit.getFullMessage() + "\r\n");
                         writer.write("Commit time: " + new Date(commit.getCommitTime() * 1000L)  + "\r\n" + "\r\n");
                         diff--;
                     }
                 }
+                textArea.setText(str);
                 writer.close();
+                scrollPane.setViewportView(textArea);
+                frame.setVisible(true);
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (NoHeadException e) {
