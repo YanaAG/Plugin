@@ -11,7 +11,7 @@ import java.awt.event.ActionListener;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Vector;
-import javax.swing.Timer;
+import javax.swing.*;
 
 public class TrackerIssues {
     private Vector<Integer> openIssue;
@@ -22,6 +22,7 @@ public class TrackerIssues {
     private IssueService issueService;
     private FileWriter writer;
     private Timer timer;
+
 
     public TrackerIssues(){
         client = new GitHubClient();
@@ -48,17 +49,36 @@ public class TrackerIssues {
     }
 
     public void issueOnGitHub(){
+        JFrame frame = new JFrame("Issues on GitHub");
+        frame.setBounds(100, 100, 765, 400);
+        JEditorPane textArea = new JEditorPane("text/html", "");
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setBounds(100, 100, 400, 400);
+        frame.getContentPane().add(scrollPane);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        String strOpen = "", strClose = "";
         try {
             for (SearchIssue searchIssue : issueService.searchIssues(repoId, "all", " ")) {
                 if (searchIssue.getState().contains("open")){
                     openIssue.add(searchIssue.getNumber());
+                    strOpen += " <b>" + searchIssue.getTitle() + " - #" + searchIssue.getNumber() + "</b>" + "<br>" + "<i> State: </i>" + searchIssue.getState() + "<br>"
+                            + "<i> Comment: </i>" + searchIssue.getBody() + "<br>" + "<i> Created: </i>" +
+                            searchIssue.getCreatedAt() + "<br>" + "<i> Updated: </i>" + searchIssue.getUpdatedAt() + "<br>" +
+                            "<i> Url: </i>" + searchIssue.getHtmlUrl() + "<br><br>";
                 } else {
                     closeIssue.add(searchIssue.getNumber());
+                    strClose += " <b>" + searchIssue.getTitle() + " - #" + searchIssue.getNumber() + "</b>" + "<br>" + "<i> State: </i>" + searchIssue.getState() + "<br>"
+                            + "<i> Comment: </i>" + searchIssue.getBody() + "<br>" + "<i> Created: </i>" +
+                            searchIssue.getCreatedAt() + "<br>" + "<i> Updated: </i>" + searchIssue.getUpdatedAt() + "<br>" +
+                            "<i> Url: </i>" + searchIssue.getHtmlUrl() + "<br><br>";
                 }
             }
+            textArea.setText(strOpen + strClose);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        scrollPane.setViewportView(textArea);
+        frame.setVisible(true);
     }
 
     public void checkIssue(){
