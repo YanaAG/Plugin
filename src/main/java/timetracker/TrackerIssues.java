@@ -22,6 +22,9 @@ public class TrackerIssues {
     private IssueService issueService;
     private FileWriter writer;
     private Timer timer;
+    private JFrame frame, frameNewIssue;
+    private JEditorPane textArea, textAreaNewIssue;
+    private JScrollPane scrollPane, scrollPaneNewIssue;
 
 
     public TrackerIssues(){
@@ -31,6 +34,20 @@ public class TrackerIssues {
         issueService = new IssueService(client);
         openIssue = new Vector<>();
         closeIssue = new Vector<>();
+        frame = new JFrame("Issues on GitHub");
+        frame.setBounds(100, 100, 765, 400);
+        textArea = new JEditorPane("text/html", "");
+        scrollPane = new JScrollPane();
+        scrollPane.setBounds(100, 100, 400, 400);
+        frame.getContentPane().add(scrollPane);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        frameNewIssue = new JFrame("Changes in issues");
+        frameNewIssue.setBounds(100, 100, 765, 400);
+        textAreaNewIssue = new JEditorPane("text/html", "");
+        scrollPaneNewIssue = new JScrollPane();
+        scrollPaneNewIssue.setBounds(100, 100, 400, 400);
+        frameNewIssue.getContentPane().add(scrollPaneNewIssue);
+        scrollPaneNewIssue.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
     }
 
     public void startTracking(){
@@ -49,13 +66,6 @@ public class TrackerIssues {
     }
 
     public void issueOnGitHub(){
-        JFrame frame = new JFrame("Issues on GitHub");
-        frame.setBounds(100, 100, 765, 400);
-        JEditorPane textArea = new JEditorPane("text/html", "");
-        JScrollPane scrollPane = new JScrollPane();
-        scrollPane.setBounds(100, 100, 400, 400);
-        frame.getContentPane().add(scrollPane);
-        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         String strOpen = "", strClose = "";
         try {
             for (SearchIssue searchIssue : issueService.searchIssues(repoId, "all", " ")) {
@@ -82,6 +92,8 @@ public class TrackerIssues {
     }
 
     public void checkIssue(){
+        int i = 0;
+        String strNewOpen = "", strNewClose = "", res = "";
         try {
             writer = new FileWriter("D:/issue.txt", true);
             for (SearchIssue searchIssue : issueService.searchIssues(repoId, "all", " ")){
@@ -94,6 +106,11 @@ public class TrackerIssues {
                         writer.write("New open issue - " + searchIssue.getNumber() + "\r\n");
                     }
                     openIssue.add(searchIssue.getNumber());
+                    strNewOpen += " <b>" + searchIssue.getTitle() + " - #" + searchIssue.getNumber() + "</b>" + "<br>" + "<i> State: </i>" + searchIssue.getState() + "<br>"
+                            + "<i> Comment: </i>" + searchIssue.getBody() + "<br>" + "<i> Created: </i>" +
+                            searchIssue.getCreatedAt() + "<br>" + "<i> Updated: </i>" + searchIssue.getUpdatedAt() + "<br>" +
+                            "<i> Url: </i>" + searchIssue.getHtmlUrl() + "<br><br>";
+                    i++;
                     //writer.write(searchIssue.getTitle() + " " + searchIssue.getState() + " " + searchIssue.getBody() + "\r\n");
                 } else {
                     if ((searchIssue.getState().contains("closed")) & !(closeIssue.contains(searchIssue.getNumber()))) {
@@ -105,17 +122,33 @@ public class TrackerIssues {
                             writer.write("New close issue - " + searchIssue.getNumber() + "\r\n");
                         }
                         closeIssue.add(searchIssue.getNumber());
+                        strNewClose += " <b>" + searchIssue.getTitle() + " - #" + searchIssue.getNumber() + "</b>" + "<br>" + "<i> State: </i>" + searchIssue.getState() + "<br>"
+                                + "<i> Comment: </i>" + searchIssue.getBody() + "<br>" + "<i> Created: </i>" +
+                                searchIssue.getCreatedAt() + "<br>" + "<i> Updated: </i>" + searchIssue.getUpdatedAt() + "<br>" +
+                                "<i> Url: </i>" + searchIssue.getHtmlUrl() + "<br><br>";
+                        i++;
                         //writer.write(searchIssue.getTitle() + " " + searchIssue.getState() + " " + searchIssue.getBody() + "\r\n");
                     }
                 }
+            }
+            res = strNewOpen + strNewClose;
+            if (i != 0){
+                showNewIssue(res);
             }
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
 
     public void stopTracking(){
         timer.stop();
+    }
+
+    public void showNewIssue(String str){
+        textAreaNewIssue.setText(str);
+        scrollPaneNewIssue.setViewportView(textAreaNewIssue);
+        frameNewIssue.setVisible(true);
     }
 }
