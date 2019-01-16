@@ -25,7 +25,7 @@ public class TrackerCommitToGit {
     private Vector<Triple<String, String, String>> allCommits = new Vector<>();
     private JFrame frame;
     private JEditorPane textArea;
-    JScrollPane scrollPane;
+    private JScrollPane scrollPane;
 
 
 
@@ -39,7 +39,7 @@ public class TrackerCommitToGit {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        frame = new JFrame("Issues");
+        frame = new JFrame("Commits");
         frame.setBounds(100, 100, 765, 400);
         textArea = new JEditorPane("text/html", "");
         scrollPane = new JScrollPane();
